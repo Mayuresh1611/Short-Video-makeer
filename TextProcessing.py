@@ -2,24 +2,37 @@ import cv2 as cv
 from PIL import ImageFont,  ImageDraw , Image , ImageFilter
 import numpy as np
 
-def drawGlow( img ,  position , text , font  , glow_radius , glow_color = (255 , 255 , 255) ):
+def drawGlow( img ,  position , text , font  , glow_radius, color = (255 , 255 , 255), glow_color = (255 , 255 , 255) , letterSpacing = 0):
     print(img.size)
-    alphaimg = Image.new('RGBA' , img.size , (255 , 255 , 255 , 0)) 
-    draw = ImageDraw.Draw(alphaimg)
-    for i in range(1, glow_radius + 1):
-        alpha = int(255 * (1 - i / (glow_radius + 1)))
-        offset = i
-        draw.text((position[0] - offset, position[1]), text, font=font, fill=(glow_color[0], glow_color[1], glow_color[2], alpha))
-        draw.text((position[0] + offset, position[1]), text, font=font, fill=(glow_color[0], glow_color[1], glow_color[2], alpha))
-        draw.text((position[0], position[1] - offset), text, font=font, fill=(glow_color[0], glow_color[1], glow_color[2], alpha))
-        draw.text((position[0], position[1] + offset), text, font=font, fill=(glow_color[0], glow_color[1], glow_color[2], alpha))
-      
-    # Draw the main text on top
-    draw.text(position, text, font=font, fill=(255 , 255 , 255))
-    combined = Image.alpha_composite(img, alphaimg)
-    return combined
+    colored_bg = img
+    text_image = Image.new('RGBA', img.size, (255, 255, 255, 0))
 
-def putText( img , text:str , font:ImageFont , alignV="bottom"  , glow=False ):
+    draw = ImageDraw.Draw(text_image)
+    
+    transparency_values = [255, 80, 70, 60, 50, 40, 30, 20, 10]
+    
+    for i in range(len(transparency_values) - glow_radius, len(transparency_values)):
+        # Create drawing context
+        draw = ImageDraw.Draw(text_image)
+        
+        # Add text to the new blank image
+        for char in text:
+                draw.text(position, char, color , (255, 150, 100, transparency_values[i]), font ,
+                stroke_width=i+1 ,align = 'center')
+                width = draw.textlength(char, font) + letterSpacing
+                position = (position[0]+width, position[1])
+
+        colored_bg = Image.alpha_composite(colored_bg, text_image)
+        
+        text_image = Image.new('RGBA', colored_bg.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(colored_bg)
+    for char in text:
+                draw.text(position, char, color, font)
+                width = draw.textlength(char, font) + letterSpacing
+                position = (position[0]+width, position[1])
+    return colored_bg
+
+def putText( img , text:str , font:ImageFont , alignV="bottom"  , color = (255 , 255 , 255) ,  glow=False , letterSpacing = 0):
     """ 
     img : Matlike cv image
     text: string
@@ -43,7 +56,10 @@ def putText( img , text:str , font:ImageFont , alignV="bottom"  , glow=False ):
     while len(splitText) > 0:
         word = splitText[0]
         potenLine = line  + word + " "
-        if font.getlength(potenLine) < imgWid:
+        wordlen = font.getlength(word) + len(potenLine) * letterSpacing
+        if wordlen > imgWid:
+            raise ValueError
+        if (font.getlength(potenLine) + len(potenLine) * letterSpacing) < imgWid:
             line = potenLine
             splitText.pop(0) 
         else:
@@ -61,7 +77,7 @@ def putText( img , text:str , font:ImageFont , alignV="bottom"  , glow=False ):
         buff = -(font.size * len(Lines)  + ((font.size * int(len(Lines) // 2)) // 2))
 
     for line in Lines:
-        textWid = font.getlength(line)
+        textWid = font.getlength(line) + len(line) * letterSpacing
 
         horiP = (imgWid - textWid) // 2
         
@@ -77,15 +93,16 @@ def putText( img , text:str , font:ImageFont , alignV="bottom"  , glow=False ):
         if vertP > imgHeight:
             raise ValueError("Text overflows the screen height")
     
-        
-            
 
         textPosition = (horiP , vertP)
         print(textPosition)
         if glow:
-            imgPIL = drawGlow(imgPIL , textPosition , text , font , 6 , (0 , 255 , 0) )
+            imgPIL = drawGlow(imgPIL , textPosition , text , font , 6 , (0 , 255 , 0) , letterSpacing )
         else:
-            draw.text(textPosition, line, font=font, fill=(0 , 0 , 0))
+            for char in line:
+                draw.text(textPosition, char, color, font )
+                width = draw.textlength(char, font) + letterSpacing
+                textPosition = (textPosition[0]+width, textPosition[1])
 
 
     imgCV = cv.cvtColor(np.array(imgPIL) , cv.COLOR_RGB2BGR)

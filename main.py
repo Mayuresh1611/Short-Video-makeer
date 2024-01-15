@@ -87,7 +87,7 @@ img = cv.resize(img, (500 , 600))
 # img = cv.cvtColor(np.array(combined) , cv.COLOR_RGB2BGR)
 
 text = " Mayuresh Satam "
-img = putText(img , text, ImageFont.truetype("arial.ttf" , 20) , alignV="top")
+img = putText(img , text, ImageFont.truetype("arial.ttf" , 40) , alignV="top" , glow=True)
 
 cv.imshow("Display Image" , img)
 cv.imwrite("saved.png" , img)

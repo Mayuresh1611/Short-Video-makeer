@@ -2,6 +2,23 @@ import cv2 as cv
 from PIL import ImageFont,  ImageDraw , Image , ImageFilter
 import numpy as np
 
+def drawGlow( img ,  position , text , font  , glow_radius , glow_color = (255 , 255 , 255) ):
+    print(img.size)
+    alphaimg = Image.new('RGBA' , img.size , (255 , 255 , 255 , 0)) 
+    draw = ImageDraw.Draw(alphaimg)
+    for i in range(1, glow_radius + 1):
+        alpha = int(255 * (1 - i / (glow_radius + 1)))
+        offset = i
+        draw.text((position[0] - offset, position[1]), text, font=font, fill=(glow_color[0], glow_color[1], glow_color[2], alpha))
+        draw.text((position[0] + offset, position[1]), text, font=font, fill=(glow_color[0], glow_color[1], glow_color[2], alpha))
+        draw.text((position[0], position[1] - offset), text, font=font, fill=(glow_color[0], glow_color[1], glow_color[2], alpha))
+        draw.text((position[0], position[1] + offset), text, font=font, fill=(glow_color[0], glow_color[1], glow_color[2], alpha))
+      
+    # Draw the main text on top
+    draw.text(position, text, font=font, fill=(255 , 255 , 255))
+    combined = Image.alpha_composite(img, alphaimg)
+    return combined
+
 def putText( img , text:str , font:ImageFont , alignV="bottom"  , glow=False ):
     """ 
     img : Matlike cv image
@@ -23,7 +40,6 @@ def putText( img , text:str , font:ImageFont , alignV="bottom"  , glow=False ):
     splitText = text.split()  
     Lines = []
     line = " " 
-    print(len(splitText))
     while len(splitText) > 0:
         word = splitText[0]
         potenLine = line  + word + " "
@@ -66,8 +82,12 @@ def putText( img , text:str , font:ImageFont , alignV="bottom"  , glow=False ):
 
         textPosition = (horiP , vertP)
         print(textPosition)
-        draw.text(textPosition, line, font=font, fill=(0 , 0 , 0))
+        if glow:
+            imgPIL = drawGlow(imgPIL , textPosition , text , font , 6 , (0 , 255 , 0) )
+        else:
+            draw.text(textPosition, line, font=font, fill=(0 , 0 , 0))
 
 
     imgCV = cv.cvtColor(np.array(imgPIL) , cv.COLOR_RGB2BGR)
     return imgCV
+

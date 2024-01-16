@@ -8,31 +8,34 @@ from TextProcessing import putText
 nameList = ["img1.jpg", "img2.jpg"]
 clips = []
 
-# for name in nameList:
-#     img = cv.imread(name)
-#     img = cv.resize(img, (1080, 1920))
+for name in nameList:
+    img = cv.imread(name)
+    img = cv.resize(img, (1080, 1920))
 
-#     text = "Only you can make it through"
-#     # Assuming you have the `putText` function implemented in TextProcessing module
-#     img = putText(img, text, ImageFont.truetype("fonts/BungeeSpice-Regular.ttf", 60),
-#                   alignV="bottom", color=(255, 0, 0), glow=False, letterSpacing=20)
+    text = "Your life is your message to the world; make sure it's inspiring."
+    # Assuming you have the `putText` function implemented in TextProcessing module
+    img = putText(img, text, ImageFont.truetype("consola.ttf", 50),
+                  alignV="bottom", color=(255, 255, 255), letterSpacing=2)
 
-#     def make_frame(t):
-#         # Note: Using t to interpolate frames over time
-#         frame = img.copy()
-#         frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
-#         return frame_rgb
+    def make_frame(t):
+        # Note: Using t to interpolate frames over time
+        frame = img.copy()
+        frame_rgb = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
+        return frame_rgb
 
-#     duration = 10
-#     fade_duration = 2
+    duration = 10
+    fade_duration = 2
 
-#     # Create a new VideoClip for each image
-#     video_clip = VideoClip(make_frame, duration=duration)
+    # Create a new VideoClip for each image
+    video_clip = VideoClip(make_frame, duration=duration)
 
-#     # Apply fadein and fadeout effects separately
-#     video_clip = fx.all.fadein(video_clip, fade_duration)
-#     video_clip = fx.all.fadeout(video_clip, fade_duration)
-#     video_clip.write_videofile(f"{name}.mp4", fps=24, codec="libx264")
+    # Apply fadein and fadeout effects separately
+    video_clip = fx.all.fadein(video_clip, fade_duration)
+    video_clip = fx.all.fadeout(video_clip, fade_duration)
+    video_clip.write_videofile(f"{name}.mp4", fps=24, codec="libx264")
+
+    cv.imwrite(f"{name}edit.jpg" , img)
+
 
 
 clips = []

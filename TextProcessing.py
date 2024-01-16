@@ -60,7 +60,7 @@ def putText( img , text:str , font:ImageFont , alignV="bottom"  , color = (255 ,
         elif alignV == "top":
             vertP = ( imgHeight // 10.8) + buff
         else:
-            vertP = ( imgHeight // 1.5) + buff
+            vertP = ( imgHeight // 1.2) + buff
         buff += font.size + (font.size // 2)
 
         if Lines.index(line) == 0:
@@ -89,7 +89,7 @@ def putText( img , text:str , font:ImageFont , alignV="bottom"  , color = (255 ,
     draw.rectangle(shape, fill =(0, 0, 0, int(255 * 0.10))) 
     #imgPIL.crop((0 , rectY[0] ,imgWid , rectY[1]))
     background.paste(imgPIL, (0, 0), imgPIL )
-
+    
     
 
     imgCV = cv.cvtColor(np.array(background) , cv.COLOR_RGB2BGR)
